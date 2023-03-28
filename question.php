@@ -6,9 +6,20 @@ date_default_timezone_set("Asia/kolkata");
 $x = date("d-M-Y  h:i A");
 
 ?>
+<script>
+    function preventBack() {
+        window.history.forward();
+    }
+
+    setTimeout("preventBack()", 0);
+
+    window.onunload = function() {
+        null
+    };
+</script>
 <div class="container-fluid px-5">
     <p class="mt-5 question mx-5"></p>
-    <div class="time" value="<?php echo $x?>"></div>
+    <div class="time" value="<?php echo $x ?>"></div>
 
 
     <div class="mt-5 ml-5">
@@ -17,26 +28,29 @@ $x = date("d-M-Y  h:i A");
         </div>
 
     </div>
-    <div class="w-25 fixed-top bg-light p-3" id="slide" style="top:65px; height: 92vh; "></div>
+    <div class="w-25 fixed-top bg-light p-3" id="slide" style="top:65px; height: 92vh; ">
+        <button class="btn mt-1 attempt"></button>
+        <button class="btn mt-1  unattempt"></button>
+        <div class="questionList">
+
+        </div>
+    </div>
 </div>
 
 <div class="bottomNav">
-        <div class="bg-secondary py-3 w-100 float-right px d-flex align-items-center justify-content-center mr-5 rounded" style="width:40%">
-            <div class="h5 time_counter align-items-center pt-2 text-light text-center d-flex justify-content-center" style="width:100px"></div>
-            <button class="btn bg-light border px-4 mx-3" id="list">List</button>
-            <button class="btn bg-light border px-4 mr-3 Previous">Previous</button>
-            <span class="h5 text-light pt-3 pl-2 d-flex" style="width:100px">
-                <div class="currentPage mr-3 h5 ">1</div> of <div class="totalPage ml-3 h5 ">11</div>
-            </span>
-            <button class="btn bg-light border px-4 ml-3 next">Next </button>
-            <button class="btn bg-light border px-4 mx-3 endtest" data-toggle="modal" data-target="#mymodal">End Test</button>
-        </div>
+    <div class="bg-secondary py-3 w-100 float-right px d-flex align-items-center justify-content-center mr-5 rounded" style="width:40%">
+        <div class="h5 time_counter align-items-center pt-2 text-light text-center d-flex justify-content-center" style="width:100px"></div>
+        <button class="btn bg-light border px-4 mx-3" id="list">List</button>
+        <button class="btn bg-light border px-4 mr-3 Previous">Previous</button>
+        <span class="h5 text-light pt-3 pl-2 d-flex" style="width:100px">
+            <div class="currentPage mr-3 h5 ">1</div> of <div class="totalPage ml-3 h5 ">11</div>
+        </span>
+        <button class="btn bg-light border px-4 ml-3 next">Next </button>
+        <button class="btn bg-light border px-4 mx-3 endtest" data-toggle="modal" data-target="#mymodal">End Test</button>
     </div>
+</div>
 
-
-
-<!-- Modal -->
-<div class="modal fade" id="mymodal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+<div class="modal fade" id="mymodal" tabindex="-1" data role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document" style="width:550px ; margin:auto">
         <div class="modal-content">
             <div class="modal-header">
@@ -54,7 +68,7 @@ $x = date("d-M-Y  h:i A");
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary close_modal" data-dismiss="modal">Close</button>
                 <a href="resultPage.php" style="text-decoration: none;"><button type="button" class="btn btn-primary proceed">proceed</button></a>
             </div>
         </div>
@@ -62,10 +76,9 @@ $x = date("d-M-Y  h:i A");
 </div>
 
 
+
 <script>
     $(document).ready(function() {
-
-        // console.log($(".time").attr("value"))
         $("#list").click(
             function() {
                 $('#slide').toggleClass("slide");
@@ -83,53 +96,78 @@ $x = date("d-M-Y  h:i A");
 
 
 
-        var minutes = 2; // set the minutes
-        var seconds = 00; // set the seconds
+        var minutes = 60;
+        var seconds = 00;
         var countdown = setInterval(function() {
-        if (seconds == 0) {
-            minutes--;
-            seconds = 59;
-        } else {
-            seconds--;
-        }
-        $('.time_counter').html(minutes + "m " + seconds + "s");
-        if (minutes == 0 && seconds == 0) {
-            clearInterval(countdown);
-            $(".endtest").click();
-        }
+            if (seconds == 0) {
+                minutes--;
+                seconds = 59;
+            } else {
+                seconds--;
+            }
+            $('.time_counter').html(minutes + "m " + seconds + "s");
+            if (minutes == 0 && seconds == 0) {
+                clearInterval(countdown);
+                $(".proceed").click();
+            }
         }, 1000);
-
-
 
     });
 
     $.getJSON('question.json', function(data) {
-
-
-        let listdata = ``;
-        for (let i = 0; i < data.length; i++) {
-            var sideQuestion = data[i].snippet;
-            listdata += `<div class="w-100 side_list py-3" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div>`;
-        }
-        $('#slide').html(listdata);
-
-
-
-
-
-
-
+       
         let arr = [];
         let arr2 = [];
 
         function loadoption(ind = 0) {
+            if(ind==0)
+            {
+                $('.Previous').prop("disabled",true);
+            }
+            else if(ind==data.length-1)
+            {
+                $('.next').prop("disabled",true);
+            }
+            else{
+                $('.Previous').prop("disabled",false);
+                $('.next').prop("disabled",false);
+            }
+
+
+            let listdata = "";
+            for (let i = 0; i < data.length; i++) {
+                var sideQuestion = data[i].snippet;
+                if(i==ind)
+                {
+                    listdata += `<div class="w-100 side_list py-3 text-primary" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div>`;
+                }
+                else{
+                    listdata += `<div class="w-100 side_list py-3" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div>`;
+                }
+            }
+            $('.questionList').html(listdata);
+
+            window.addEventListener('click', function(e) {
+                let _opened = $('#slide').hasClass('slide');
+
+                if (_opened === true && !document.getElementById('slide').contains(e.target) && !document.getElementById('list').contains(e.target)) {
+                    // Clicked in box
+                    console.log('clicked outside sidelist');
+                    // $('#slide-button').click();
+                    $('#slide').toggleClass('slide');
+
+
+                    console.log(_opened);
+                }
+            });
+
 
             var questionAnswers = JSON.parse(data[ind].content_text);
-            $('.question').text(questionAnswers.question);
+            $('.question').text(parseInt(ind) + 1 + ") " + questionAnswers.question);
             let answer = ``;
             for (let i = 0; i < questionAnswers['answers'].length; i++) {
                 answer += `
-                <label class="h5 w-25 ml-2 d-flex answer_block">
+                <label class="h5 w-75 ml-2 d-flex answer_block">
                 <input type="radio" name="click" class="mylabel" questionId="${data[ind].content_id}" value="${questionAnswers['answers'][i]['is_correct']}" option="${i}">
                 <div class="ml-3 ans_option">${questionAnswers['answers'][i]['answer']}</div>
             </label>
@@ -140,6 +178,7 @@ $x = date("d-M-Y  h:i A");
             $(".mylabel").click(function(e) {
                 arr[ind] = $(e.target).attr('value');
                 arr2[ind] = $(e.target).attr('option');
+                test();
             })
 
 
@@ -147,27 +186,21 @@ $x = date("d-M-Y  h:i A");
             sessionStorage.setItem("optionInd", JSON.stringify(arr2));
             sessionStorage.setItem("items", JSON.stringify(arr));
 
-                let retString = sessionStorage.getItem("optionInd")
-                let retArray = JSON.parse(retString)
-                let optind = document.querySelectorAll('.mylabel')
-                for (let i = 0; i < 4; i++) {
-                    if(retArray[ind]==i)
-                    {
-                        optind[i].setAttribute('checked', true);
-                    }
+            let retString = sessionStorage.getItem("optionInd")
+            let retArray = JSON.parse(retString)
+            let optind = document.querySelectorAll('.mylabel')
+            for (let i = 0; i < questionAnswers['answers'].length; i++) {
+                if (retArray[ind] == i) {
+                    optind[i].setAttribute('checked', true);
                 }
-
-            
-
-
-            
+            }
 
 
-            $(".endtest").click(function() {
 
+            function test() {
                 window.sessionStorage.setItem("optionInd", JSON.stringify(arr2));
-                
-                
+
+
                 let items = `<i class="fa-solid fa-list"></i> ${data.length} Items</span>`;
                 $('.items').html(items);
 
@@ -176,21 +209,20 @@ $x = date("d-M-Y  h:i A");
                 var storedArray = JSON.parse(sessionStorage.getItem("items"));
 
 
-    
+
                 let Attemped = storedArray.filter(function(value) {
-    
+
                     if (value != null) {
                         return value;
                     }
-    
+
                 })
-
-
 
                 let attemp = `<span class="font-weight-bold"><i class="fa-solid fa-eye"></i></i> ${Attemped.length} Attempted</span>`;
 
+
                 $('.attempt').html(attemp);
-                
+
                 let unattemp = `<span class="font-weight-bold"><i class="fa-solid fa-eye-slash"></i></i> ${data.length-Attemped.length} Unattempted</span>`;
 
                 $('.unattempt').html(unattemp);
@@ -200,12 +232,18 @@ $x = date("d-M-Y  h:i A");
                 resultdata.push(Attemped.length);
                 resultdata.push($(".time").attr("value"));
 
-
-                $(".proceed").click(function()
-                {
+                $(".proceed").click(function() {
                     window.sessionStorage.setItem("resultdata", JSON.stringify(resultdata));
                 })
 
+            }
+
+
+            test();
+
+
+            $(".endtest").click(function() {
+                test();
             })
 
         }
@@ -217,14 +255,14 @@ $x = date("d-M-Y  h:i A");
 
         }
 
-        $(".side_list").click(function(e) {
+        $("body").click(function(e) {
+            if(e.target.classList.contains('side_list')){
                 index = $(e.target).attr('val');
-                // console.log(typeof);
+                console.log(index);
                 loadoption(index);
-                tabindex=index;                
-                $(".currentPage").text(parseInt(index)+1);
-                
-            })
+            }
+        })
+        
 
         $('.totalPage').text(data.length);
 

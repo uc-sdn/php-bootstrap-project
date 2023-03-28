@@ -81,6 +81,7 @@
             position: absolute; 
             transition: .5s ease;
             overflow: scroll;
+            /* text-align: center; */
         }
         .bottomNav
         {
@@ -97,9 +98,9 @@
             font-size: 18px;
         }
         
-        /* seq:before {
+        seq:before {
             content: attr(no);
-        } */
+        }
         .side_list
         {
             border-bottom: 1px solid #e6e3e3;
@@ -107,6 +108,10 @@
         .side_list:last-child
         {
             border: none;
+        }
+        .active
+        {
+            color: blue;
         }
     </style>
 </head>
