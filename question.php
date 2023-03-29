@@ -260,6 +260,8 @@ $x = date("d-M-Y  h:i A");
                 index = $(e.target).attr('val');
                 console.log(index);
                 loadoption(index);
+                tabindex=index;
+                $('.currentPage').text(parseInt(tabindex) + 1);
             }
         })
         
