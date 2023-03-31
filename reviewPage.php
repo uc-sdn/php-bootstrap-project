@@ -7,6 +7,7 @@ include('header.php');
     .answer_block {
         pointer-events: none;
     }
+
     .a_next,
     .a_previous {
         text-decoration: none;
@@ -16,11 +17,11 @@ include('header.php');
 $no = $_GET['question_id'];
 ?>
 <div class="container-fluid px-5 mb-2 w-100">
-
     <div class="btn p-4 text-light d-flex justify-content-center">
         <a href="#result" style="text-decoration: none;">
             <div class="alert"><i class="fa-solid mr-2 "></i></div>
-    </div></a>
+        </a>
+    </div>
 </div>
 
 <p class=" question mx-5"></p>
@@ -29,8 +30,7 @@ $no = $_GET['question_id'];
     <div class="mt-3 answer_block"></div>
 </div>
 
-<div class="w-25 fixed-top bg-light p-3" id="slide" style="top:65px; height: 92vh; ">
-</div>
+<div class="w-25 fixed-top bg-light p-3" id="slide" style="top:65px; height: 92vh; "></div>
 
 <div class="bottomNav">
     <div class="bg-secondary py-3 float-right px d-flex align-items-center justify-content-center mr-5 rounded" style="width:85%">
@@ -44,8 +44,6 @@ $no = $_GET['question_id'];
     </div>
 </div>
 
-
-
 <div class="m-5 px-5" id="result">
     <h5 class="border-bottom pb-2 pt-5">Explanation</h5>
     <div class="explanation">
@@ -54,6 +52,8 @@ $no = $_GET['question_id'];
 
 
 <script src="jquery.js"></script>
+<script src="QuestionRender.js"></script>
+
 <script>
     $(document).ready(function() {
         $("#list").click(
@@ -61,15 +61,6 @@ $no = $_GET['question_id'];
                 $('#slide').toggleClass("slide");
             }
         )
-        $("#slide").click(
-            function() {
-                $('#slide').blur().removeClass("slide");
-            }
-        )
-
-        $(".fixed-top").blur(function() {
-            $("#slide").blur().removeClass("slide");
-        });
     });
 
     let queries = {};
@@ -80,52 +71,32 @@ $no = $_GET['question_id'];
 
     jsindex = Number(queries.question_id);
 
-
-
-
     $.getJSON('question.json', function(data) {
-
-
         let listdata = ``;
-            for (let i = 0; i < data.length; i++) {
-                let sideQuestion = data[i].snippet;
-                if(i==jsindex)
-                {
-                    listdata += `<a class="slideLink"  style="text-decoration: none; color:black"><div class="w-100 side_list py-3 text-primary" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div></a>`;
-                }
-                else{
-                    listdata += `<a class="slideLink"  style="text-decoration: none; color:black"><div class="w-100 side_list py-3" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div></a>`;
-                }
+        for (let i = 0; i < data.length; i++) {
+            let sideQuestion = data[i].snippet;
+            if (i == jsindex) {
+                listdata += `<a class="slideLink"  style="text-decoration: none; color:black"><div class="w-100 side_list py-3 text-primary" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div></a>`;
+            } else {
+                listdata += `<a class="slideLink"  style="text-decoration: none; color:black"><div class="w-100 side_list py-3" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div></a>`;
             }
-            $('#slide').html(listdata);
-
-            window.addEventListener('click', function(e) {
-                let _opened = $('#slide').hasClass('slide');
-
-                if (_opened === true && !document.getElementById('slide').contains(e.target) && !document.getElementById('list').contains(e.target)) {
-                    $('#slide').toggleClass('slide');
-                }
-            });
-
-        let questionAnswers = JSON.parse(data[jsindex].content_text);
-        $('.question').text(jsindex + 1 + ") " + questionAnswers.question);
-        $('.explanation').html(questionAnswers.explanation);
-        let answer = ``;
-        for (let i = 0; i < questionAnswers['answers'].length; i++) {
-            answer += `
-            <label class="h5 w-75 ml-2 d-flex answer_block">
-                <input type="radio" name="click" class="mylabel">
-                <div class="ml-3 ans_option">${questionAnswers['answers'][i]['answer']}</div>
-            </label>
-                `;
-            $('.answer_block').html(answer)
         }
+        $('#slide').html(listdata);
+
+        window.addEventListener('click', function(e) {
+            let _opened = $('#slide').hasClass('slide');
+
+            if (_opened === true && !document.getElementById('slide').contains(e.target) && !document.getElementById('list').contains(e.target)) {
+                $('#slide').toggleClass('slide');
+            }
+        });
+
+        let length = questionrend(jsindex, data, 1);
 
         let correct_answers = [];
         let correct_index = [];
         for (let i = 0; i < data.length; i++) {
             questionAnswers = JSON.parse(data[i].content_text);
-
 
             for (let j = 0; j < questionAnswers.answers.length; j++) {
                 if (questionAnswers.answers[j].is_correct == 1) {
@@ -155,7 +126,7 @@ $no = $_GET['question_id'];
         let optind = document.querySelectorAll('.mylabel');
         let ans_option = document.querySelectorAll('.ans_option');
 
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < length; i++) {
             if (optionInd[jsindex] == i) {
 
                 optind[i].setAttribute('checked', true);
@@ -197,14 +168,6 @@ $no = $_GET['question_id'];
         })
     });
 </script>
-
-
-
-
-
-
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>

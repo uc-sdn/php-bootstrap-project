@@ -17,6 +17,7 @@ $x = date("d-M-Y  h:i A");
         null
     };
 </script>
+<script src="QuestionRender.js"></script>
 <div class="container-fluid px-5">
     <p class="mt-5 question mx-5"></p>
     <div class="time" value="<?php echo $x ?>"></div>
@@ -75,8 +76,6 @@ $x = date("d-M-Y  h:i A");
     </div>
 </div>
 
-
-
 <script>
     $(document).ready(function() {
         $("#list").click(
@@ -94,11 +93,9 @@ $x = date("d-M-Y  h:i A");
             $("#slide").blur().removeClass("slide");
         });
 
-
-
-        var minutes = 60;
-        var seconds = 00;
-        var countdown = setInterval(function() {
+        let minutes = 00;
+        let seconds = 05;
+        let countdown = setInterval(function() {
             if (seconds == 0) {
                 minutes--;
                 seconds = 59;
@@ -111,37 +108,29 @@ $x = date("d-M-Y  h:i A");
                 $(".proceed").click();
             }
         }, 1000);
-
     });
 
     $.getJSON('question.json', function(data) {
-       
+
         let arr = [];
         let arr2 = [];
 
         function loadoption(ind = 0) {
-            if(ind==0)
-            {
-                $('.Previous').prop("disabled",true);
+            if (ind == 0) {
+                $('.Previous').prop("disabled", true);
+            } else if (ind == data.length - 1) {
+                $('.next').prop("disabled", true);
+            } else {
+                $('.Previous').prop("disabled", false);
+                $('.next').prop("disabled", false);
             }
-            else if(ind==data.length-1)
-            {
-                $('.next').prop("disabled",true);
-            }
-            else{
-                $('.Previous').prop("disabled",false);
-                $('.next').prop("disabled",false);
-            }
-
 
             let listdata = "";
             for (let i = 0; i < data.length; i++) {
-                var sideQuestion = data[i].snippet;
-                if(i==ind)
-                {
+                let sideQuestion = data[i].snippet;
+                if (i == ind) {
                     listdata += `<div class="w-100 side_list py-3 text-primary" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div>`;
-                }
-                else{
+                } else {
                     listdata += `<div class="w-100 side_list py-3" val="${i}" style="cursor:pointer">${i+1+") "}${sideQuestion}</div>`;
                 }
             }
@@ -149,31 +138,13 @@ $x = date("d-M-Y  h:i A");
 
             window.addEventListener('click', function(e) {
                 let _opened = $('#slide').hasClass('slide');
-
                 if (_opened === true && !document.getElementById('slide').contains(e.target) && !document.getElementById('list').contains(e.target)) {
-                    // Clicked in box
-                    console.log('clicked outside sidelist');
-                    // $('#slide-button').click();
                     $('#slide').toggleClass('slide');
-
-
-                    console.log(_opened);
                 }
             });
 
 
-            var questionAnswers = JSON.parse(data[ind].content_text);
-            $('.question').text(parseInt(ind) + 1 + ") " + questionAnswers.question);
-            let answer = ``;
-            for (let i = 0; i < questionAnswers['answers'].length; i++) {
-                answer += `
-                <label class="h5 w-75 ml-2 d-flex answer_block">
-                <input type="radio" name="click" class="mylabel" questionId="${data[ind].content_id}" value="${questionAnswers['answers'][i]['is_correct']}" option="${i}">
-                <div class="ml-3 ans_option">${questionAnswers['answers'][i]['answer']}</div>
-            </label>
-                `;
-                $('.answer_block').html(answer)
-            }
+            let length = questionrend(ind, data, 0);
 
             $(".mylabel").click(function(e) {
                 arr[ind] = $(e.target).attr('value');
@@ -181,21 +152,17 @@ $x = date("d-M-Y  h:i A");
                 test();
             })
 
-
-
             sessionStorage.setItem("optionInd", JSON.stringify(arr2));
             sessionStorage.setItem("items", JSON.stringify(arr));
 
             let retString = sessionStorage.getItem("optionInd")
             let retArray = JSON.parse(retString)
             let optind = document.querySelectorAll('.mylabel')
-            for (let i = 0; i < questionAnswers['answers'].length; i++) {
+            for (let i = 0; i < length; i++) {
                 if (retArray[ind] == i) {
                     optind[i].setAttribute('checked', true);
                 }
             }
-
-
 
             function test() {
                 window.sessionStorage.setItem("optionInd", JSON.stringify(arr2));
@@ -205,11 +172,7 @@ $x = date("d-M-Y  h:i A");
                 $('.items').html(items);
 
                 window.sessionStorage.setItem("items", JSON.stringify(arr));
-
-                var storedArray = JSON.parse(sessionStorage.getItem("items"));
-
-
-
+                let storedArray = JSON.parse(sessionStorage.getItem("items"));
                 let Attemped = storedArray.filter(function(value) {
 
                     if (value != null) {
@@ -219,12 +182,9 @@ $x = date("d-M-Y  h:i A");
                 })
 
                 let attemp = `<span class="font-weight-bold"><i class="fa-solid fa-eye"></i></i> ${Attemped.length} Attempted</span>`;
-
-
                 $('.attempt').html(attemp);
 
                 let unattemp = `<span class="font-weight-bold"><i class="fa-solid fa-eye-slash"></i></i> ${data.length-Attemped.length} Unattempted</span>`;
-
                 $('.unattempt').html(unattemp);
 
                 let resultdata = [];
@@ -235,34 +195,30 @@ $x = date("d-M-Y  h:i A");
                 $(".proceed").click(function() {
                     window.sessionStorage.setItem("resultdata", JSON.stringify(resultdata));
                 })
-
             }
 
-
             test();
-
 
             $(".endtest").click(function() {
                 test();
             })
-
         }
 
         let tabindex = 0;
         if (tabindex == 0) {
             loadoption();
             $('.currentPage').text(tabindex + 1);
-
         }
 
         $("body").click(function(e) {
-            if(e.target.classList.contains('side_list')){
+            if (e.target.classList.contains('side_list')) {
                 index = $(e.target).attr('val');
                 console.log(index);
                 loadoption(index);
+                tabindex = index;
+                $('.currentPage').text(parseInt(tabindex) + 1);
             }
         })
-        
 
         $('.totalPage').text(data.length);
 
@@ -281,9 +237,6 @@ $x = date("d-M-Y  h:i A");
                 $('.currentPage').text(tabindex + 1);
             }
         })
-
-
-
     });
 </script>
 

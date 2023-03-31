@@ -6,30 +6,31 @@ include('header.php');
 
 <style>
     .statusBox {
-            width: 150px;
-            /* height: 40px; */
-            padding: 5px;
-            /* background-color: rgb(109, 221, 109); */
-            border-radius: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-    .correct{
-            border: 2px solid rgb(109, 221, 109);
-            color: rgb(109, 221, 109);
+        width: 150px;
+        padding: 5px;
+        border-radius: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
     }
-    .incorrect{
-            border: 2px solid rgb(247, 99, 99);
-            color: rgb(247, 99, 99);
+
+    .correct {
+        border: 2px solid rgb(109, 221, 109);
+        color: rgb(109, 221, 109);
     }
-    .result-unattempt{
-            border: 2px solid orange;
-            color: orange;
+
+    .incorrect {
+        border: 2px solid rgb(247, 99, 99);
+        color: rgb(247, 99, 99);
     }
-    .question
-    {
+
+    .result-unattempt {
+        border: 2px solid orange;
+        color: orange;
+    }
+
+    .question {
         display: flex;
         align-items: center;
     }
@@ -96,10 +97,10 @@ include('header.php');
 
     <script src="jquery.js"></script>
     <script>
-        var resultdata = JSON.parse(sessionStorage.getItem("resultdata"));
-        var storedArray = JSON.parse(sessionStorage.getItem("items"));
+        let resultdata = JSON.parse(sessionStorage.getItem("resultdata"));
+        let storedArray = JSON.parse(sessionStorage.getItem("items"));
 
-        var optionInd = JSON.parse(sessionStorage.getItem("optionInd"));
+        let optionInd = JSON.parse(sessionStorage.getItem("optionInd"));
 
 
         let correct = storedArray.filter(function(value) {
@@ -121,13 +122,13 @@ include('header.php');
 
         $.getJSON('question.json', function(data) {
 
-            var correct_answers = [];
-            var correct_index = [];
-            for (var i = 0; i < data.length; i++) {
+            let correct_answers = [];
+            let correct_index = [];
+            for (let i = 0; i < data.length; i++) {
                 questionAnswers = JSON.parse(data[i].content_text);
 
 
-                for (var j = 0; j < questionAnswers.answers.length; j++) {
+                for (let j = 0; j < questionAnswers.answers.length; j++) {
                     if (questionAnswers.answers[j].is_correct == 1) {
                         correct_answers.push(questionAnswers.answers[j].is_correct);
                         correct_index.push(j);
@@ -137,7 +138,7 @@ include('header.php');
 
             let tabledata = ``;
             for (let i = 0; i < data.length; i++) {
-                var questionAnswers = data[i].snippet;
+                let questionAnswers = data[i].snippet;
                 tabledata += `
                         <tr class="datalist">
                             <td>${i+1}</td>
